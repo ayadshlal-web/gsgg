@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <title>تجربة أسئلة برمجة</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+
+    body {
+
+      font-family: "Cairo", sans-serif;
+
+      background: #111;
+
+      color: #fff;
+
+      margin: 0;
+
+      padding: 20px;
+
+      text-align: center;
+
+    }
+
+    button {
+
+      background: #1e1e1e;
+
+      color: #0f0;
+
+      padding: 10px 20px;
+
+      margin: 10px;
+
+      border: none;
+
+      border-radius: 10px;
+
+      cursor: pointer;
+
+      font-size: 16px;
+
+    }
+
+    input {
+
+      padding: 8px;
+
+      border-radius: 6px;
+
+      border: 1px solid #555;
+
+      background: #222;
+
+      color: #fff;
+
+    }
+
+    .message {
+
+      margin-top: 20px;
+
+      color: #f33;
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h1>اختبارات البرمجة</h1>
+
+
+
+  <div id="loginBox">
+
+    <input id="username" placeholder="اسم المستخدم">
+
+    <button id="loginBtn">تسجيل الدخول</button>
+
+  </div>
+
+
+
+  <div id="mainBox" style="display:none;">
+
+    <h2 id="welcome"></h2>
+
+    <button id="reportBtn">تبليغ عن مستخدم</button>
+
+    <button id="blockBtn">حظر مستخدم</button>
+
+    <p class="message" id="notify"></p>
+
+  </div>
+
+
+
+  <script type="module">
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
+
+
+
+    // ضع مفاتيحك هنا
+
+    const firebaseConfig = {
+
+      apiKey: "AIzaSyC292Glp6IJzkIylKTM_vy8gnuviPEejNc",
+
+      authDomain: "programming-3fa63.firebaseapp.com",
+
+      projectId: "programming-3fa63",
+
+      storageBucket: "programming-3fa63.firebasestorage.app",
+
+      messagingSenderId: "993714550270",
+
+      appId: "1:993714550270:web:7c1ad96f01eb9b75b73caf",
+
+      databaseURL: "https://programming-3fa63-default-rtdb.asia-southeast1.firebasedatabase.app/"
+
+    };
+
+
+
+    const app = initializeApp(firebaseConfig);
+
+    const db = getDatabase(app);
+
+
+
+    const loginBtn = document.getElementById("loginBtn");
+
+    const reportBtn = document.getElementById("reportBtn");
+
+    const blockBtn = document.getElementById("blockBtn");
+
+    const usernameInput = document.getElementById("username");
+
+    const notify = document.getElementById("notify");
+
+    const loginBox = document.getElementById("loginBox");
+
+    const mainBox = document.getElementById("mainBox");
+
+    const welcome = document.getElementById("welcome");
+
+
+
+    let currentUser = null;
+
+
+
+    loginBtn.onclick = () => {
+
+      const name = usernameInput.value.trim();
+
+      if (!name) return alert("اكتب اسم المستخدم أولاً");
+
+      currentUser = name;
+
+      set(ref(db, "users/" + name), { reported: false, blocked: false });
+
+      welcome.textContent = "مرحباً، " + name;
+
+      loginBox.style.display = "none";
+
+      mainBox.style.display = "block";
+
+      listenForBlocks();
+
+    };
+
+
+
+    reportBtn.onclick = () => {
+
+      const target = prompt("أدخل اسم المستخدم الذي تريد التبليغ عنه:");
+
+      if (!target) return;
+
+      set(ref(db, "reports/" + target + "/" + currentUser), true);
+
+      alert("تم إرسال التبليغ عن " + target);
+
+    };
+
+
+
+    blockBtn.onclick = () => {
+
+      const target = prompt("أدخل اسم المستخدم الذي تريد حظره:");
+
+      if (!target) return;
+
+      set(ref(db, "users/" + target + "/blocked"), true);
+
+      set(ref(db, "notifications/" + Date.now()), { message: `تم حظر المستخدم (${target})` });
+
+      alert("تم حظر " + target);
+
+    };
+
+
+
+    function listenForBlocks() {
+
+      const notifRef = ref(db, "notifications");
+
+      onValue(notifRef, snapshot => {
+
+        const data = snapshot.val();
+
+        if (data) {
+
+          const keys = Object.keys(data);
+
+          const last = data[keys[keys.length - 1]];
+
+          notify.textContent = last.message;
+
+        }
+
+      });
+
+    }
+
+  </script>
+
+</body>
+
+</html>
