@@ -5,7 +5,6 @@
   <title>اختبارات البرمجة</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="S.css">
-  <script type="module" src="d.js"></script>
   <style>
     body {
       font-family: "Cairo", sans-serif;
@@ -117,7 +116,8 @@
       }
     ];
 
-    loginBtn.onclick = () => {
+    // تسجيل الدخول
+    loginBtn.addEventListener("click", () => {
       const name = usernameInput.value.trim();
       if (!name) return alert("اكتب اسم المستخدم أولاً");
       currentUser = name;
@@ -128,23 +128,26 @@
       quizBox.style.display = "block";
       renderQuestion();
       listenForBlocks();
-    };
+    });
 
-    reportBtn.onclick = () => {
+    // التبليغ
+    reportBtn.addEventListener("click", () => {
       const target = prompt("أدخل اسم المستخدم الذي تريد التبليغ عنه:");
       if (!target) return;
       set(ref(db, "reports/" + target + "/" + currentUser), true);
       alert("تم إرسال التبليغ عن " + target);
-    };
+    });
 
-    blockBtn.onclick = () => {
+    // الحظر
+    blockBtn.addEventListener("click", () => {
       const target = prompt("أدخل اسم المستخدم الذي تريد حظره:");
       if (!target) return;
       set(ref(db, "users/" + target + "/blocked"), true);
       set(ref(db, "notifications/" + Date.now()), { message: `تم حظر المستخدم (${target})` });
       alert("تم حظر " + target);
-    };
+    });
 
+    // متابعة الإشعارات
     function listenForBlocks() {
       const notifRef = ref(db, "notifications");
       onValue(notifRef, snapshot => {
@@ -157,6 +160,7 @@
       });
     }
 
+    // الأسئلة
     function renderQuestion() {
       const stage = stages[currentStage];
       const q = stage.questions[currentQuestion];
@@ -184,7 +188,7 @@
       nextBtn.classList.remove("hidden");
     }
 
-    nextBtn.onclick = () => {
+    nextBtn.addEventListener("click", () => {
       const stage = stages[currentStage];
       if (currentQuestion < stage.questions.length - 1) {
         currentQuestion++;
@@ -198,7 +202,7 @@
         resultEl.textContent = "مبروك! نقاطك: " + points;
         nextBtn.classList.add("hidden");
       }
-    };
+    });
   </script>
 </body>
 </html>
